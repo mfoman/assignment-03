@@ -3,6 +3,7 @@ namespace Assignment3.Entities;
 [Index(nameof(Name), IsUnique = true)]
 public class Tag
 {
+    [Key]
     public int TagId { get; set; }
 
     [Required, MaxLength(50)]

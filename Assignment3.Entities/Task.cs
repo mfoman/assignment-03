@@ -2,6 +2,7 @@ namespace Assignment3.Entities;
 
 public class Task
 {
+    [Key]
     public int TaskId { get; set; }
 
     [Required, MaxLength(100)]
