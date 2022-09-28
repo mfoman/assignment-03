@@ -1,6 +1,6 @@
 namespace Assignment3.Entities.Tests;
 
-public class TagRepositoryTests
+public class TagRepositoryTests : TestBase
 {
     // 1. Trying to update or delete a non-existing entity should return NotFound
     [Fact]
