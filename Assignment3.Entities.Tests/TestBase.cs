@@ -18,7 +18,7 @@ public abstract class TestBase : IDisposable
             .Options;
 
         // Create the schema and seed some data
-        using var context = new KanbanContext(_contextOptions);
+        using var context = new KanbanContext();
 
         //         if (context.Database.EnsureCreated())
         //         {
