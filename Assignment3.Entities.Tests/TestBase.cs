@@ -1,11 +1,14 @@
+using Assignment3.Core;
 using Assignment3.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Task = Assignment3.Entities.Task;
 
 public abstract class TestBase : IDisposable
 {
     private SqliteConnection _connection;
     private DbContextOptions<KanbanContext> _contextOptions;
+    protected KanbanContext _context;
 
     public TestBase()
     {
@@ -18,22 +21,42 @@ public abstract class TestBase : IDisposable
             .Options;
 
         // Create the schema and seed some data
-        using var context = new KanbanContext();
+        var context = new KanbanContext(_contextOptions);
 
-        //         if (context.Database.EnsureCreated())
-        //         {
-        //             using var viewCommand = context.Database.GetDbConnection().CreateCommand();
-        //             viewCommand.CommandText = @"
-        // CREATE VIEW AllResources AS
-        // SELECT Url
-        // FROM Blogs;";
-        //             viewCommand.ExecuteNonQuery();
-        //         }
+        context.Database.EnsureCreated();
 
-        // context.AddRange(
-        //     new Blog { Name = "Blog1", Url = "http://blog1.com" },
-        //     new Blog { Name = "Blog2", Url = "http://blog2.com" });
-        // context.SaveChanges();
+        var user = new User()
+        {
+            Name = "Frederik Raisa",
+            Email = "frai@itu.dk"
+        };
+
+        var tagInUse = new Tag("InUse")
+        {
+            TagId = 1,
+        };
+
+        var tasks = new List<Task>
+        {
+            new Task{
+                TaskId = 10,
+                Title = "task 1",
+                AssignedTo = user,
+                Description = "do this",
+                State = State.Active,
+                Tags = new List<Tag> {tagInUse}
+            }
+        };
+
+        tagInUse.Tasks.Add(tasks[0]);
+
+        context.Users.Add(user);
+        context.Tags.AddRange(tagInUse);
+        context.Tasks.AddRange(tasks);
+
+        context.SaveChanges();
+
+        _context = context;
     }
 
     public void Dispose() => _connection.Dispose();

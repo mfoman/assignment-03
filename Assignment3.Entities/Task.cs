@@ -2,12 +2,22 @@ namespace Assignment3.Entities;
 
 public class Task
 {
+    // public Task(int taskId, string? title, User? assignedTo, string? description, State? state, List<Tag>? tags)
+    // {
+    //     TaskId = taskId;
+    //     Title = title;
+    //     AssignedTo = assignedTo;
+    //     Description = description;
+    //     State = state;
+    //     Tags = tags;
+    // }
+
     [Key]
     public int TaskId { get; set; }
 
     [Required, MaxLength(100)]
     public string? Title { get; set; }
-    public User? AssignedTo { get; set; }
+    public User? AssignedTo { get; set; } = new();
     public string? Description { get; set; }
 
     [Required]
