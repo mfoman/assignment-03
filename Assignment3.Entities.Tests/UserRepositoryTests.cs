@@ -18,13 +18,13 @@ public class UserRepositoryTests : TestBase
     {
         // Update
         {
-            var response = _repo.Update(new UserUpdateDTO(1, "frederik", "frai@itu.dk"));
+            var response = _repo.Update(new UserUpdateDTO(-1, "asge", "frai@itu.dk"));
             response.Should().Be(Response.NotFound);
         }
 
         // Delete
         {
-            var response = _repo.Delete(1);
+            var response = _repo.Delete(-1);
             response.Should().Be(Response.NotFound);
         }
     }
@@ -33,36 +33,30 @@ public class UserRepositoryTests : TestBase
     [Fact]
     public void create_read_update_should_return_response()
     {
-        // Create
-        {
-            var (response, tagId) = _repo.Create(new UserCreateDTO("frederik", "frai@itu.dk"));
-
-            response.Should().Be(Response.Created);
-            tagId.Should().Be(2);
-        }
+        var (responseCreated, tagId) = _repo.Create(new UserCreateDTO("frederik", "asger@itu.dk"));
+        responseCreated.Should().Be(Response.Created);
 
         // Read
         {
-            var userDetails = _repo.Read(2);
+            var userDetails = _repo.Read(tagId);
             userDetails.Name.Should().Be("frederik");
         }
 
         // Update
         {
-            var response = _repo.Update(new UserUpdateDTO(2, "Asger", "frai@itu.dk"));
+            var response = _repo.Update(new UserUpdateDTO(tagId, "Asger", "asger@itu.dk"));
             response.Should().Be(Response.Updated);
         }
 
         // Read
         {
-            var userDetails = _repo.Read(2);
+            var userDetails = _repo.Read(tagId);
             userDetails.Name.Should().Be("Asger");
         }
 
-
         // Delete
         {
-            var response = _repo.Delete(2);
+            var response = _repo.Delete(tagId);
             response.Should().Be(Response.Deleted);
         }
     }
@@ -72,7 +66,7 @@ public class UserRepositoryTests : TestBase
     public void NotFound_returns_null()
     {
         // Read
-        _repo.Read(2).Should().BeNull();
+        _repo.Read(-1).Id.Should().Be(-1);
     }
 
     /* --------------------------------- Unique --------------------------------- */
@@ -91,13 +85,13 @@ public class UserRepositoryTests : TestBase
     public void delete_active_user_without_force_returns_conflict()
     {
         {
-            var response = _repo.Delete(2);
+            var response = _repo.Delete(1);
 
             response.Should().Be(Response.Conflict);
         }
 
         {
-            var response = _repo.Delete(2, true);
+            var response = _repo.Delete(1, true);
 
             response.Should().Be(Response.Deleted);
         }
