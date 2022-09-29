@@ -1,38 +1,78 @@
+using Assignment3.Core;
+
 namespace Assignment3.Entities.Tests;
 
 public class TaskRepositoryTests : TestBase
 {
+    private TaskRepository _repo;
+
+    public TaskRepositoryTests()
+    {
+        // Given
+        _repo = new TaskRepository(_context);
+    }
+
     // 1. Trying to update or delete a non-existing entity should return NotFound
     [Fact]
     public void update_delete_on_nonexisting_returns_NotFound()
     {
-        // Given
+        // Update
+        {
+            var response = _repo.Update(new TaskUpdateDTO(1, "title", 1, "desc", new List<String> { }, State.Active));
+            response.Should().Be(Response.NotFound);
+        }
 
-        // When
-
-        // Then
+        // Delete
+        {
+            var response = _repo.Delete(1);
+            response.Should().Be(Response.NotFound);
+        }
     }
 
     // 2. Create, Read, and Update should return a proper Response
     [Fact]
     public void create_read_update_should_return_response()
     {
-        // Given
+        // Create
+        {
+            var (response, tagId) = _repo.Create(new TaskCreateDTO("title", 1, "desc", new List<String> { }));
 
-        // When
+            response.Should().Be(Response.Created);
+            tagId.Should().Be(2);
+        }
 
-        // Then
+        // Read
+        {
+            var taskDetails = _repo.Read(2);
+            taskDetails.Title.Should().Be("title");
+        }
+
+        // Update
+        {
+            var response = _repo.Update(new TaskUpdateDTO(1, "title", 1, "desc", new List<String> { }, State.Closed));
+            response.Should().Be(Response.Updated);
+        }
+
+        // Read
+        {
+            var taskDetails = _repo.Read(2);
+            taskDetails.Title.Should().Be(null);
+        }
+
+
+        // Delete
+        {
+            var response = _repo.Delete(2);
+            response.Should().Be(Response.Deleted);
+        }
     }
 
     // 5. If a task, tag, or user is not found, return null
     [Fact]
     public void NotFound_returns_null()
     {
-        // Given
-
-        // When
-
-        // Then
+        // Read
+        _repo.Read(2).Should().BeNull();
     }
 
     /* --------------------------------- Unique --------------------------------- */
