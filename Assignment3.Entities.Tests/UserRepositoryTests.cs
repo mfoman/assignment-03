@@ -1,38 +1,78 @@
+using Assignment3.Core;
+
 namespace Assignment3.Entities.Tests;
 
 public class UserRepositoryTests : TestBase
 {
+    private UserRepository _repo;
+
+    public UserRepositoryTests()
+    {
+        // Given
+        _repo = new UserRepository(_context);
+    }
+
     // 1. Trying to update or delete a non-existing entity should return NotFound
     [Fact]
     public void update_delete_on_nonexisting_returns_NotFound()
     {
-        // Given
+        // Update
+        {
+            var response = _repo.Update(new UserUpdateDTO(1, "frederik", "frai@itu.dk"));
+            response.Should().Be(Response.NotFound);
+        }
 
-        // When
-
-        // Then
+        // Delete
+        {
+            var response = _repo.Delete(1);
+            response.Should().Be(Response.NotFound);
+        }
     }
 
     // 2. Create, Read, and Update should return a proper Response
     [Fact]
     public void create_read_update_should_return_response()
     {
-        // Given
+        // Create
+        {
+            var (response, tagId) = _repo.Create(new UserCreateDTO("frederik", "frai@itu.dk"));
 
-        // When
+            response.Should().Be(Response.Created);
+            tagId.Should().Be(2);
+        }
 
-        // Then
+        // Read
+        {
+            var userDetails = _repo.Read(2);
+            userDetails.Name.Should().Be("frederik");
+        }
+
+        // Update
+        {
+            var response = _repo.Update(new UserUpdateDTO(2, "Asger", "frai@itu.dk"));
+            response.Should().Be(Response.Updated);
+        }
+
+        // Read
+        {
+            var userDetails = _repo.Read(2);
+            userDetails.Name.Should().Be("Asger");
+        }
+
+
+        // Delete
+        {
+            var response = _repo.Delete(2);
+            response.Should().Be(Response.Deleted);
+        }
     }
 
     // 5. If a task, tag, or user is not found, return null
     [Fact]
     public void NotFound_returns_null()
     {
-        // Given
-
-        // When
-
-        // Then
+        // Read
+        _repo.Read(2).Should().BeNull();
     }
 
     /* --------------------------------- Unique --------------------------------- */
