@@ -123,7 +123,17 @@ public class TaskRepository : ITaskRepository
 
     public IReadOnlyCollection<TaskDTO> ReadAll()
     {
-        throw new NotImplementedException();
+        var Tasks = from c in _context.Tasks
+                    orderby c.Title
+                    select new TaskDTO(
+                        c.TaskId,
+                        c.Title ?? "",
+                        (c.AssignedTo == null ? "" : c.AssignedTo.Name ?? ""),
+                        c.Tags as IReadOnlyCollection<string> ?? new List<string> { },
+                        c.State
+                    );
+
+        return Tasks.ToArray();
     }
 
     public IReadOnlyCollection<TaskDTO> ReadAllByState(State state)
