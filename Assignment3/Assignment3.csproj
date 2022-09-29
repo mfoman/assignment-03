@@ -1,19 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>581d0ba1-9dc4-47d2-8a8d-6eae05fc7b4b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Assignment3.Core\Assignment3.Core.csproj" />
     <ProjectReference Include="..\Assignment3.Entities\Assignment3.Entities.csproj" />
   </ItemGroup>
-<!-- 
+
   <ItemGroup>
-    <ProjectReference Include="..\Assignment3.Core\Assignment3.Core.csproj" />
-  </ItemGroup> -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+  </ItemGroup>
 
 </Project>
