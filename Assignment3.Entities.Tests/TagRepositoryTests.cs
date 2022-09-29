@@ -18,13 +18,13 @@ public class TagRepositoryTests : TestBase
     {
         // Update
         {
-            var response = _repo.Update(new TagUpdateDTO(1, "changed custom"));
+            var response = _repo.Update(new TagUpdateDTO(-1, "changed custom"));
             response.Should().Be(Response.NotFound);
         }
 
         // Delete
         {
-            var response = _repo.Delete(1);
+            var response = _repo.Delete(-1);
             response.Should().Be(Response.NotFound);
         }
     }

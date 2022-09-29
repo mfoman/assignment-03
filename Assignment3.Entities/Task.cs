@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Assignment3.Entities;
 
 public class Task
@@ -21,8 +23,14 @@ public class Task
     public string? Description { get; set; }
 
     [Required]
-    public State? State { get; set; }
+    public State State { get; set; }
     public List<Tag>? Tags { get; set; } = new();
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime? UpdatedDate { get; set; }
 }
 
 // - Id : int

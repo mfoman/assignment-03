@@ -1,5 +1,7 @@
 using Assignment3.Core;
 
+using Thread = System.Threading.Tasks;
+
 namespace Assignment3.Entities.Tests;
 
 public class TaskRepositoryTests : TestBase
@@ -34,35 +36,31 @@ public class TaskRepositoryTests : TestBase
     public void create_read_update_should_return_response()
     {
         // Create
-        {
-            var (response, tagId) = _repo.Create(new TaskCreateDTO("title", 1, "desc", new List<String> { }));
-
-            response.Should().Be(Response.Created);
-            tagId.Should().Be(2);
-        }
+        var (createResponse, tagId) = _repo.Create(new TaskCreateDTO("unique title", 1, "desc", new List<string> { "Active" }));
+        createResponse.Should().Be(Response.Created);
 
         // Read
         {
-            var taskDetails = _repo.Read(2);
-            taskDetails.Title.Should().Be("title");
+            var taskDetails = _repo.Read(tagId);
+            taskDetails.Title.Should().Be("unique title");
         }
 
         // Update
         {
-            var response = _repo.Update(new TaskUpdateDTO(1, "title", 1, "desc", new List<String> { }, State.Closed));
+            var response = _repo.Update(new TaskUpdateDTO(tagId, "title updated", 1, "desc", new List<String> { }, State.New));
             response.Should().Be(Response.Updated);
         }
 
         // Read
         {
-            var taskDetails = _repo.Read(2);
-            taskDetails.Title.Should().Be(null);
+            var taskDetails = _repo.Read(tagId);
+            taskDetails.Title.Should().Be("title updated");
         }
 
 
         // Delete
         {
-            var response = _repo.Delete(2);
+            var response = _repo.Delete(tagId);
             response.Should().Be(Response.Deleted);
         }
     }
@@ -72,7 +70,7 @@ public class TaskRepositoryTests : TestBase
     public void NotFound_returns_null()
     {
         // Read
-        _repo.Read(2).Should().BeNull();
+        _repo.Read(2).Id.Should().Be(-1);
     }
 
     /* --------------------------------- Unique --------------------------------- */
@@ -82,7 +80,9 @@ public class TaskRepositoryTests : TestBase
     public void only_new_tasks_can_be_deleted()
     {
         // Given
-        var res = _repo.Delete(420);
+        var (_, id) = _repo.Create(new TaskCreateDTO("Delete me", null, null, new List<string> { }));
+
+        var res = _repo.Delete(id);
 
         res.Should().Be(Response.Deleted);
     }
@@ -92,9 +92,11 @@ public class TaskRepositoryTests : TestBase
     public void delete_active_task_set_to_removed()
     {
         // Given
-        var res = _repo.Delete(421);
+        var (rep, id) = _repo.Create(new TaskCreateDTO("Delete me", null, null, new List<string> { }));
+        _repo.Update(new TaskUpdateDTO(id, "updated", null, null, new List<string> { }, State.Active));
 
         // Because only removed
+        var res = _repo.Delete(id);
         res.Should().Be(Response.Updated);
     }
 
@@ -102,21 +104,26 @@ public class TaskRepositoryTests : TestBase
     [Fact]
     public void delete_task_resolved_closed_remoted_returns_conflict()
     {
+        var (_, id) = _repo.Create(new TaskCreateDTO("Delete me", null, null, new List<string> { }));
+
         {
             // Resolved
-            var res = _repo.Delete(422);
+            _repo.Update(new TaskUpdateDTO(id, "resolved", null, null, new List<string> { }, State.Resolved));
+            var res = _repo.Delete(id);
             res.Should().Be(Response.Conflict);
         }
 
         {
             // Closed
-            var res = _repo.Delete(423);
+            _repo.Update(new TaskUpdateDTO(id, "resolved", null, null, new List<string> { }, State.Closed));
+            var res = _repo.Delete(id);
             res.Should().Be(Response.Conflict);
         }
 
         {
             // Removed
-            var res = _repo.Delete(424);
+            _repo.Update(new TaskUpdateDTO(id, "resolved", null, null, new List<string> { }, State.Removed));
+            var res = _repo.Delete(id);
             res.Should().Be(Response.Conflict);
         }
     }
@@ -142,26 +149,29 @@ public class TaskRepositoryTests : TestBase
     public void create_update_task_allow_editing_tags()
     {
         // Given
-        var res = _repo.Update(new TaskUpdateDTO(1, "updated", null, "desc", new List<string> { }, State.Active));
+        var (response, id) = _repo.Create(new TaskCreateDTO("new task", null, null, new List<string> { "Active" }));
+        var res = _repo.Update(new TaskUpdateDTO(id, "updated", null, "desc", new List<string> { "Dead" }, State.Active));
 
         res.Should().Be(Response.Updated);
     }
 
     // 6. Updating the State of a task will change the StateUpdated to current time in UTC
     [Fact]
-    public void updating_state_change_updated_to_current_utc()
+    async public Thread.Task updating_state_change_updated_to_current_utc()
     {
         // Given
         var (response, id) = _repo.Create(new TaskCreateDTO("new task", null, null, new List<string> { }));
-        var expected = DateTime.UtcNow;
 
+        await Thread.Task.Delay(2000);
+
+        var expected = DateTime.UtcNow;
         var res = _repo.Update(new TaskUpdateDTO(id, "updated", null, "desc", new List<string> { }, State.Active));
 
         // When
         var task = _repo.Read(id);
 
         // Then
-        task.StateUpdated.Should().BeCloseTo(expected, precision: TimeSpan.FromSeconds(5));
+        task.StateUpdated.Should().BeCloseTo(expected, precision: TimeSpan.FromSeconds(2));
     }
 
     // 7. Assigning a user which does not exist should return BadRequest
