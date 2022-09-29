@@ -78,25 +78,29 @@ public class UserRepositoryTests : TestBase
     /* --------------------------------- Unique --------------------------------- */
 
     // 1. Users who are assigned to a task may only be deleted using the force
-    [Fact]
-    public void users_assigned_to_task_only_delete_with_force()
-    {
-        // Given
+    // [Fact]
+    // public void users_assigned_to_task_only_delete_with_force()
+    // {
+    //     var response = _repo.Delete(2, true);
 
-        // When
-
-        // Then
-    }
+    //     response.Should().Be(Response.Deleted);
+    // }
 
     // 2. Trying to delete a user in use without the force should return Conflict
     [Fact]
     public void delete_active_user_without_force_returns_conflict()
     {
-        // Given
+        {
+            var response = _repo.Delete(2);
 
-        // When
+            response.Should().Be(Response.Conflict);
+        }
 
-        // Then
+        {
+            var response = _repo.Delete(2, true);
+
+            response.Should().Be(Response.Deleted);
+        }
     }
 
     // 3. Trying to create a user which exists already (same email) should return Conflict.
@@ -104,9 +108,9 @@ public class UserRepositoryTests : TestBase
     public void create_user_that_exists_email_returns_conflict()
     {
         // Given
+        _repo.Create(new UserCreateDTO("Lundsteen", "lundsteen@itu.dk"));
+        var (res, id) = _repo.Create(new UserCreateDTO("Lundsteen", "lundsteen@itu.dk"));
 
-        // When
-
-        // Then
+        res.Should().Be(Response.Conflict);
     }
 }
